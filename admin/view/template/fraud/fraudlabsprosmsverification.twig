@@ -1,0 +1,142 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="float-end">
+        <button type="submit" form="form-fraud" data-bs-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fas fa-save"></i></button>
+        <a class="btn btn-light" data-bs-toggle="tooltip" href="{{ back }}" title="{{ button_back }}"><i class="fas fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-pencil-alt"></i> {{ text_edit }}</div>
+      <div class="card-body">
+        <div class="alert alert-info"><i class="fa fa-exclamation-circle"></i> {{ text_signup }}</div>
+        <form id="form-fraud" action="{{ save }}" method="post"  data-oc-toggle="ajax">
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="fraud_fraudlabsprosmsverification_status" id="input-status" class="form-select">
+                <option value="1"{% if fraud_fraudlabsprosmsverification_status %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                <option value="0"{% if not fraud_fraudlabsprosmsverification_status %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-key">{{ entry_key }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input type="text" name="fraud_fraudlabsprosmsverification_key" value="{{ fraud_fraudlabsprosmsverification_key }}" id="input-key" placeholder="{{ entry_key }}" class="form-control"/>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-sms-instruction"><span data-toggle="tooltip" title="{{ help_sms_instruction }}">{{ entry_sms_instruction }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <textarea name="fraud_fraudlabsprosmsverification_sms_instruction" class="form-control" rows="4" cols="50">{{ fraud_fraudlabsprosmsverification_sms_instruction }}</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-sms-template"><span data-toggle="tooltip" title="{{ help_sms_template }}">{{ entry_sms_template }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input type="text" name="fraud_fraudlabsprosmsverification_sms_template" value="{{ fraud_fraudlabsprosmsverification_sms_template }}" id="input-sms-template" placeholder="{{ entry_sms_template }}" class="form-control"/>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-sms-email-subject"><span data-toggle="tooltip" title="{{ help_sms_email_subject }}">{{ entry_sms_email_subject }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input type="text" name="fraud_fraudlabsprosmsverification_sms_email_subject" value="{{ fraud_fraudlabsprosmsverification_sms_email_subject }}" id="input-sms-email-subject" class="form-control"/>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-sms-email-content"><span data-toggle="tooltip" title="{{ help_sms_email_content }}">{{ entry_sms_email_content }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input type="text" name="fraud_fraudlabsprosmsverification_sms_email_content" value="{{ fraud_fraudlabsprosmsverification_sms_email_content }}" id="input-sms-email-content" class="form-control"/>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-sms-otp-timeout"><span data-toggle="tooltip" title="{{ help_sms_otp_timeout }}">{{ entry_sms_otp_timeout }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input type="text" name="fraud_fraudlabsprosmsverification_sms_otp_timeout" value="{{ fraud_fraudlabsprosmsverification_sms_otp_timeout }}" id="input-sms-otp-timeout" class="form-control"/>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-sms-tel-cc">{{ entry_sms_tel_cc }}</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <select name="fraud_fraudlabsprosmsverification_sms_tel_cc" id="input-sms-tel-cc" class="form-select">
+                {{ fraud_fraudlabsprosmsverification_countries }}
+              </select>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-msg-otp-success"><span data-toggle="tooltip" title="{{ help_msg_otp_success }}">{{ entry_msg_otp_success }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <textarea name="fraud_fraudlabsprosmsverification_msg_otp_success" class="form-control" rows="4" cols="50">{{ fraud_fraudlabsprosmsverification_msg_otp_success }}</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-msg-otp-fail"><span data-toggle="tooltip" title="{{ help_msg_otp_fail }}">{{ entry_msg_otp_fail }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <textarea name="fraud_fraudlabsprosmsverification_msg_otp_fail" class="form-control" rows="4" cols="50">{{ fraud_fraudlabsprosmsverification_msg_otp_fail }}</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-msg-invalid-phone"><span data-toggle="tooltip" title="{{ help_msg_invalid_phone }}">{{ entry_msg_invalid_phone }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <textarea name="fraud_fraudlabsprosmsverification_msg_invalid_phone" class="form-control" rows="4" cols="50">{{ fraud_fraudlabsprosmsverification_msg_invalid_phone }}</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-msg-invalid-otp"><span data-toggle="tooltip" title="{{ help_msg_invalid_otp }}">{{ entry_msg_invalid_otp }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <textarea name="fraud_fraudlabsprosmsverification_msg_invalid_otp" class="form-control" rows="4" cols="50">{{ fraud_fraudlabsprosmsverification_msg_invalid_otp }}</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-debug-status"><span data-toggle="tooltip" title="{{ help_debug_status }}">{{ entry_debug_status }} <i class="fas fa-question-circle"></i></span></label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <select name="fraud_fraudlabsprosmsverification_debug_status" id="input-debug-status" class="form-select">
+                  <option value="1"{% if fraud_fraudlabsprosmsverification_debug_status %} selected="selected"{% endif %}>{{ text_enabled }}</option>
+                  <option value="0"{% if not fraud_fraudlabsprosmsverification_debug_status %} selected="selected"{% endif %}>{{ text_disabled }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <fieldset>
+            <div class="form-group" style="padding-left:15px;">
+              <div>{{ text_information }}</div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
