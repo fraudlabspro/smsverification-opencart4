@@ -17,7 +17,7 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 
 		$data['breadcrumbs'][] = [
 			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/home')
+			'href' => $this->url->link('common/home', '', true)
 		];
 
 		// Get "heading_title" from language file
