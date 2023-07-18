@@ -179,7 +179,15 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		$this->model_extension_fraudlabsprosmsverification_fraud_fraudlabsprosmsverification->install();
 
 		$this->load->model('setting/event');
-		$this->model_setting_event->addEvent('fraudlabsprosmsverification', '', 'catalog/controller/checkout/success/before', 'extension/fraudlabsprosmsverification/fraud/fraudlabsprosmsverification|before_checkout_success');
+		$data = [
+			'code'        => 'fraudlabsprosmsverification',
+			'description' => '',
+			'trigger'     => 'catalog/controller/checkout/success/before',
+			'action'      => 'extension/fraudlabsprosmsverification/fraud/fraudlabsprosmsverification.before_checkout_success',
+			'status'      => 1,
+			'sort_order'  => 1,
+		];
+		$this->model_setting_event->addEvent($data);
 	}
 
 	public function uninstall(): void {
