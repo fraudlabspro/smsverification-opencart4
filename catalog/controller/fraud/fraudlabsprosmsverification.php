@@ -120,7 +120,7 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 					$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
 					$mail->smtp_port = $this->config->get('config_mail_smtp_port');
 					$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
-			
+
 					$mail->setTo($emailAddress);
 					$mail->setFrom($this->config->get('config_email'));
 					$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
@@ -157,6 +157,7 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		}
 
 		$params['format'] = 'json';
+		$params['key'] = $apiKey;
 		$params['tel'] = trim($tel);
 		if (strpos($params['tel'], '+') !== 0)
 			$params['tel'] = '+' . $params['tel'];
@@ -166,99 +167,91 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		$params['tel_cc'] = (isset($this->request->post['tel_cc'])) ? $this->request->post['tel_cc'] : "";
 		$params['otp_timeout'] = $this->config->get('fraud_fraudlabsprosmsverification_sms_otp_timeout');
 		$params['source'] = 'opencart';
-		$url = 'https://api.fraudlabspro.com/v1/verification/send';
 
-		$query = '';
+		$request = $this->post('https://api.fraudlabspro.com/v2/verification/send', $params);
 
-		foreach($params as $key=>$value) {
-			$query .= '&' . $key . '=' . rawurlencode($value);
-		}
+		if ($request) {
+			$data = json_decode($request);
 
-		$url = $url . '?key=' . $apiKey . $query;
-
-		$result = file_get_contents($url);
-
-		// Network error, wait 2 seconds for next retry
-		if (!$result) {
-			for ($i = 0; $i < 3; ++$i) {
-				sleep(2);
-				$result = file_get_contents($url);
+			if (isset($data->error->error_message)) {
+				die('ERROR 600-' . $data->error->error_message);
+			} else {
+				die ('OK' . $data->tran_id . $data->otp_char);
 			}
-		}
-
-		// Still having network issue after 3 retries, give up
-		if (!$result)
-			die ('ERROR 500');
-
-		// Get the HTTP response
-		$data = json_decode($result);
-
-		if (trim($data->error) != '') {
-			die('ERROR 600-' . $data->error);
 		} else {
-			die ('OK' . $data->tran_id . $data->otp_char);
+			// Network error
+			die ('ERROR 500');
 		}
 	}
 
 	public function sms_verify(): void {
-		$apiKey = $this->config->get('fraud_fraudlabsprosmsverification_key');
 		$params['format'] = 'json';
+		$params['key'] = $this->config->get('fraud_fraudlabsprosmsverification_key');
 		$params['otp'] = (isset($this->request->post['otp'])) ? $this->request->post['otp'] : die('ERROR 400-3');
 		$params['tran_id'] = (isset($this->request->post['tran_id'])) ? $this->request->post['tran_id'] : die('ERROR 400-4');
-		$url = 'https://api.fraudlabspro.com/v1/verification/result';
 
-		$query = '';
+		$request = $this->post('https://api.fraudlabspro.com/v2/verification/result', $params);
 
-		foreach($params as $key=>$value) {
-			$query .= '&' . $key . '=' . rawurlencode($value);
-		}
+		if ($request) {
+			$data = json_decode($request);
 
-		$url = $url . '?key=' . $apiKey . $query;
-
-		$result = file_get_contents($url);
-
-		// Network error, wait 2 seconds for next retry
-		if (!$result) {
-			for ($i = 0; $i < 3; ++$i) {
-				sleep(2);
-				$result = file_get_contents($url);
-			}
-		}
-
-		// Still having network issue after 3 retries, give up
-		if (!$result)
-			die ('ERROR 500');
-
-		// Get the HTTP response
-		$data = json_decode($result);
-
-		if (trim($data->error) != '') {
-			if ($data->error == 'Invalid OTP.') {
-				die('ERROR 601-' . $data->error);
+			if (isset($data->error->error_message)) {
+				if ($data->error->error_message == 'INVALID OTP') {
+					die('ERROR 601-' . $data->error->error_message);
+				} else {
+					die('ERROR 600-' . $data->error->error_message);
+				}
 			} else {
-				die('ERROR 600-' . $data->error);
-			}
-		} else {
-			$smsOrderId = (isset($this->request->post['sms_order_id'])) ? $this->request->post['sms_order_id'] : "";
-			$smsCode = (isset($this->request->post['sms_code'])) ? $this->request->post['sms_code'] : "";
-			$smsPhone = (isset($this->request->post['sms_tel'])) ? $this->request->post['sms_tel'] : "";
-			if (($smsOrderId != "") && ($smsCode != "")) {
-				$query = $this->db->query("SELECT `fraudlabspro_sms_email_code` FROM `" . DB_PREFIX . "fraudlabsprosmsverification` WHERE order_id = '" . $smsOrderId . "' AND `fraudlabspro_sms_email_code` = '" . $smsCode . "';");
-				$emailCode = $query->row['fraudlabspro_sms_email_code'];
+				$smsOrderId = (isset($this->request->post['sms_order_id'])) ? $this->request->post['sms_order_id'] : "";
+				$smsCode = (isset($this->request->post['sms_code'])) ? $this->request->post['sms_code'] : "";
+				$smsPhone = (isset($this->request->post['sms_tel'])) ? $this->request->post['sms_tel'] : "";
+				if (($smsOrderId != "") && ($smsCode != "")) {
+					$query = $this->db->query("SELECT `fraudlabspro_sms_email_code` FROM `" . DB_PREFIX . "fraudlabsprosmsverification` WHERE order_id = '" . $smsOrderId . "' AND `fraudlabspro_sms_email_code` = '" . $smsCode . "';");
+					$emailCode = $query->row['fraudlabspro_sms_email_code'];
 
-				if ($emailCode == $smsCode) {
-					$this->db->query("UPDATE `" . DB_PREFIX . "fraudlabsprosmsverification` SET `fraudlabspro_sms_email_code` = '" . $smsCode . "_VERIFIED', `fraudlabspro_sms_email_phone` = '" . $smsPhone . "', `fraudlabspro_sms_email_sms` = 'VERIFIED' WHERE `order_id` = '" . $smsOrderId . "' AND `fraudlabspro_sms_email_code` = '" . $smsCode . "';");
+					if ($emailCode == $smsCode) {
+						$this->db->query("UPDATE `" . DB_PREFIX . "fraudlabsprosmsverification` SET `fraudlabspro_sms_email_code` = '" . $smsCode . "_VERIFIED', `fraudlabspro_sms_email_phone` = '" . $smsPhone . "', `fraudlabspro_sms_email_sms` = 'VERIFIED' WHERE `order_id` = '" . $smsOrderId . "' AND `fraudlabspro_sms_email_code` = '" . $smsCode . "';");
 
-					$query = $this->db->query("SELECT `is_phone_verified` FROM `" . DB_PREFIX . "fraudlabspro` WHERE order_id = '" . $smsOrderId . "';");
-					$isPhoneVerified = $query->row['is_phone_verified'];
+						$query = $this->db->query("SELECT `is_phone_verified` FROM `" . DB_PREFIX . "fraudlabspro` WHERE order_id = '" . $smsOrderId . "';");
+						$isPhoneVerified = $query->row['is_phone_verified'];
 
-					if ($isPhoneVerified == '') {
-						$this->db->query("UPDATE `" . DB_PREFIX . "fraudlabspro` SET `is_phone_verified` = '" . $smsPhone . " verified' WHERE `order_id` = '" . $smsOrderId . "';");
+						if ($isPhoneVerified == '') {
+							$this->db->query("UPDATE `" . DB_PREFIX . "fraudlabspro` SET `is_phone_verified` = '" . $smsPhone . " verified' WHERE `order_id` = '" . $smsOrderId . "';");
+						}
 					}
 				}
+				die ('OK');
 			}
-			die ('OK');
+		} else {
+			// Network error
+			die ('ERROR 500');
 		}
+	}
+
+	private function post(string $url, array $fields): array|boolean {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_FAILONERROR, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+		curl_setopt($ch, CURLOPT_HTTP_VERSION, '1.1');
+		curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+		if (!empty($fields)) {
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, (is_array($fields)) ? http_build_query($fields) : $fields);
+		}
+
+		$response = curl_exec($ch);
+
+		if (!curl_errno($ch)) {
+			return $response;
+		}
+
+		return false;
 	}
 
 	// Generate random code for email verification.
