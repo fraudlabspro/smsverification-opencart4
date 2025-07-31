@@ -31,7 +31,7 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		$data['footer'] = $this->load->controller('common/footer');
 		$data['header'] = $this->load->controller('common/header');
 
-		$instruction = (null !== $this->config->get('fraud_fraudlabsprosmsverification_sms_instruction')) ? $this->config->get('fraud_fraudlabsprosmsverification_sms_instruction') : 'You are required to verify your phone number by completing the SMS verification process. Please enter your phone number (with country code) to get the OTP message.';
+		$instruction = (null !== $this->config->get('fraud_fraudlabsprosmsverification_sms_instruction')) ? strip_tags($this->config->get('fraud_fraudlabsprosmsverification_sms_instruction')) : 'You are required to verify your phone number by completing the SMS verification process. Please enter your phone number (with country code) to get the OTP message.';
 
 		$id = (isset($this->request->get['orderid'])) ? $this->request->get['orderid'] : '';
 		$code = (isset($this->request->get['code'])) ? $this->request->get['code'] : '';
@@ -149,6 +149,34 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		$apiKey = $this->config->get('fraud_fraudlabsprosmsverification_key');
 		$smsOrderId = (isset($this->request->post['sms_order_id'])) ? $this->request->post['sms_order_id'] : "";
 		$tel = (isset($this->request->post['tel'])) ? $this->request->post['tel'] : die('ERROR 400-2');
+
+		$max_attempts = 3;
+		$time_period = 300;
+
+		if (!isset($this->session->data['flp_sms_attempts'])) {
+			$this->session->data['flp_sms_attempts'] = [];
+		}
+
+		$attempts_data = isset($this->session->data['flp_sms_attempts'][$smsOrderId]) ? $this->session->data['flp_sms_attempts'][$smsOrderId] : ['count' => 0, 'first_attempt_time' => 0];
+		$current_time = time();
+
+		if (($current_time - $attempts_data['first_attempt_time']) > $time_period) {
+			$attempts_data['count'] = 0;
+			$attempts_data['first_attempt_time'] = 0;
+		}
+
+		if ($attempts_data['count'] >= $max_attempts) {
+			// Too many requests
+			die('ERROR 700');
+		}
+
+		$attempts_data['count']++;
+		if ($attempts_data['first_attempt_time'] == 0) {
+			$attempts_data['first_attempt_time'] = $current_time;
+		}
+
+		$this->session->data['flp_sms_attempts'][$smsOrderId] = $attempts_data;
+
 		if ($smsOrderId != "") {
 			$query = $this->db->query("SELECT `fraudlabspro_id` FROM `" . DB_PREFIX . "fraudlabsprosmsverification` WHERE order_id = '" . $smsOrderId . "';");
 			$flpId = $query->row['fraudlabspro_id'];
@@ -228,10 +256,10 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		}
 	}
 
-	private function post(string $url, array $fields): array|boolean {
+	private function post(string $url, array $fields): string|boolean {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_FAILONERROR, true);
+		curl_setopt($ch, CURLOPT_FAILONERROR, false);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

@@ -15,14 +15,13 @@
     {% endif %}
     <div id="content" class="{{ class }}">{{ content_top }}
       <h1>{{ heading_title }}</h1>
-      <!--div>{{ my_text }}</div-->
       {{ content_bottom }}
 
         {{ content_error }}
         <div id="flp-sms-verification" {{ my_style }}>
             <div id="flp_sms" class="page-width">
               <div id="sms_err" style="background-color:#f8d7da;color:#7d5880;padding:10px;margin-bottom:20px;font-size:1em;display:none;"></div>
-              <p id="sms_info_display">{{ flp_sms_instruction }}</p>
+              <p id="sms_info_display">{{ flp_sms_instruction|e }}</p>
               <label for="phone_number" id="enter_phone_number">
                 <input type="text" name="phone_number" id="phone_number" value="">
               </label>
@@ -33,11 +32,11 @@
               <input class="btn btn-light" type="button" name="submit_otp" id="submit_otp" value="Submit OTP" style="display: none;">
               <input class="btn btn-light" type="button" name="get_otp" id="get_otp" value="Get OTP">
               <input class="btn btn-secondary" type="button" name="reset_pn" id="reset_pn" value="Reset Phone" style="display: none;">
-              <input type="hidden" name="sms_phone_cc" id="sms_phone_cc" value="{{ flp_sms_tel_cc }}">
+              <input type="hidden" name="sms_phone_cc" id="sms_phone_cc" value="{{ flp_sms_tel_cc|e }}">
               <input type="hidden" name="sms_verified" id="sms_verified" value="">
               <input type="hidden" name="sms_tran_id" id="sms_tran_id" value="">
-              <input type="hidden" name="sms_order_id" id="sms_order_id" value="{{ flp_sms_order_id }}">
-              <input type="hidden" name="sms_code" id="sms_code" value="{{ flp_sms_code }}"></div>
+              <input type="hidden" name="sms_order_id" id="sms_order_id" value="{{ flp_sms_order_id|e }}">
+              <input type="hidden" name="sms_code" id="sms_code" value="{{ flp_sms_code|e }}"></div>
             <div id="sms_success_status" style="text-align:center;background-color:#d4edda;color:#2e7769;padding:1.5rem;display:none;">Thank you. You have successfully completed the SMS verification.</div>
         </div>
         <script src="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/intlTelInput.min.js"></script>
@@ -51,12 +50,12 @@
         <script>
         jQuery(document).ready(function(){
             var phoneNum, phoneNo, defaultCc;
-            var msg_otp_success = "{{ flp_sms_msg_otp_success }}";
+            var msg_otp_success = "{{ flp_sms_msg_otp_success|e }}";
             msg_otp_success = msg_otp_success.split("{phone}");
-            var msg_otp_fail = "{{ flp_sms_msg_otp_fail }}";
+            var msg_otp_fail = "{{ flp_sms_msg_otp_fail|e }}";
             msg_otp_fail = msg_otp_fail.split("{phone}");
-            var msg_invalid_phone = "{{ flp_sms_msg_invalid_phone }}";
-            var msg_invalid_otp = "{{ flp_sms_msg_invalid_otp }}";
+            var msg_invalid_phone = "{{ flp_sms_msg_invalid_phone|e }}";
+            var msg_invalid_otp = "{{ flp_sms_msg_invalid_otp|e }}";
 
             jQuery(document).ready(function() {
                 if(jQuery("#sms_phone_cc").length ){

@@ -165,7 +165,28 @@ class Fraudlabsprosmsverification extends \Opencart\System\Engine\Controller {
 		if (!$json) {
 			$this->load->model('setting/setting');
 
-			$this->model_setting_setting->editSetting('fraud_fraudlabsprosmsverification', $this->request->post);
+			$post_data = $this->request->post;
+
+			$plain_text_fields = [
+				'fraud_fraudlabsprosmsverification_key',
+				'fraud_fraudlabsprosmsverification_sms_instruction',
+				'fraud_fraudlabsprosmsverification_sms_template',
+				'fraud_fraudlabsprosmsverification_sms_email_subject',
+				'fraud_fraudlabsprosmsverification_sms_email_content',
+				'fraud_fraudlabsprosmsverification_sms_otp_timeout',
+				'fraud_fraudlabsprosmsverification_msg_otp_success',
+				'fraud_fraudlabsprosmsverification_msg_otp_fail',
+				'fraud_fraudlabsprosmsverification_msg_invalid_phone',
+				'fraud_fraudlabsprosmsverification_msg_invalid_otp'
+			];
+
+			foreach ($plain_text_fields as $field) {
+				if (isset($post_data[$field])) {
+					$post_data[$field] = strip_tags($post_data[$field]);
+				}
+			}
+
+			$this->model_setting_setting->editSetting('fraud_fraudlabsprosmsverification', $post_data);
 
 			$json['success'] = $this->language->get('text_success');
 		}
